@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#153e43">
+  <title>营运预算工作台</title>
+  <link rel="stylesheet" href="/static/styles.css">
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+  <header class="app-header">
+    <a class="brand" href="/" aria-label="营运预算工作台首页">
+      <span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" aria-hidden="true"><path d="M6 17.5h12V6a3 3 0 0 0-3-3H9a3 3 0 0 0-3 3v11.5Z"/><path d="M6 10h12M9 6h6M8 17.5V21m8-3.5V21"/><path d="M9 14h.01M15 14h.01" stroke-width="3" stroke-linecap="round"/></svg></span>
+      <span>营运预算<span class="brand-light">工作台</span></span>
+    </a>
+    <div class="header-note"><span class="status-dot"></span>数据保存在当前环境，本版用于预算试算</div>
+    <div class="header-actions">
+      <button class="button button-quiet" id="help-button">使用说明</button>
+      <button class="button button-outline" id="versions-button" hidden>版本记录 <span id="version-count" class="count-pill">0</span></button>
+    </div>
+  </header>
+
+  <main class="page-shell">
+    <div class="page-heading">
+      <div><div class="eyebrow">OPERATIONS / BUDGET PLANNING</div><h1>营运预算调整</h1><p class="page-subtitle">由你决定调整范围，让原表公式完成联动计算。</p></div>
+      <div class="heading-actions" id="heading-actions" hidden><button id="import-another" class="button button-outline"><span aria-hidden="true">↑</span> 导入基础表</button><button id="export-button" class="button button-primary"><span aria-hidden="true">↓</span> 导出 Excel</button></div>
+    </div>
+
+    <nav class="workflow" aria-label="预算调整步骤"><div class="workflow-step active" id="step-1"><span class="step-number">1</span><span>导入基础表</span><small>保留原始版本</small></div><span class="step-connector"></span><div class="workflow-step" id="step-2"><span class="step-number">2</span><span>选择调整范围</span><small>线路 · 月份 · 计划</small></div><span class="step-connector"></span><div class="workflow-step" id="step-3"><span class="step-number">3</span><span>调整与试算</span><small>批量减少 · 局部恢复</small></div><span class="step-connector"></span><div class="workflow-step" id="step-4"><span class="step-number">4</span><span>保存并导出</span><small>每版都有记录</small></div></nav>
+
+    <section id="empty-state" class="welcome-panel" aria-labelledby="welcome-title">
+      <div class="welcome-copy"><span class="tag tag-green">从现有 Excel 开始</span><h2 id="welcome-title">一次调整，<br>看清每一趟的变化。</h2><p>导入预算基础表，选择线路和月份，<br>试算 A 计划「营运1」减少 1 台的影响。</p><button class="button button-primary button-large" id="demo-button">打开已提供的预算基础表 <span aria-hidden="true">→</span></button><div class="welcome-note">使用独立副本，原始上传文件保持不变。</div></div>
+      <div class="upload-zone" id="upload-zone" tabindex="0" role="button" aria-label="选择 Excel 预算基础表，或将文件拖到这里"><div class="file-icon"><svg viewBox="0 0 40 44" fill="none" aria-hidden="true"><path d="M8 2h17l10 10v29H8V2Z" stroke="currentColor" stroke-width="1.5"/><path d="M25 2v10h10M14 21h15M14 27h15M14 33h10" stroke="currentColor" stroke-width="1.5"/></svg><span>XLSX</span></div><strong>或导入你的预算基础表</strong><span>点击选择文件，也可以拖拽到此处</span><small>仅支持 .xlsx · 请沿用现有基础表结构</small></div>
+      <div class="welcome-features"><div><span>01</span><strong>原表公式保留</strong><p>只调整确认的输入，保留原有计算关系。</p></div><div><span>02</span><strong>先减，再局部恢复</strong><p>按线路和月份操作，重点线路可锁定。</p></div><div><span>03</span><strong>版本可对比、可追溯</strong><p>记录调整范围、原因，以及计算结果。</p></div></div>
+    </section>
+
+    <section id="workspace" hidden aria-label="预算调整工作区">
+      <div class="dataset-bar"><div class="dataset-info"><span class="mini-file" aria-hidden="true">X</span><div><strong id="dataset-name"></strong><span id="dataset-description"></span></div></div><div class="dataset-badges"><span class="tag tag-neutral">V0 原始版本只读</span><span class="tag tag-green" id="baseline-status">保留原表公式</span></div></div>
+
+      <div class="metrics-grid"><article class="metric-card"><span class="metric-label">原始月趟次 <span class="scope-label">当前筛选范围</span></span><strong id="metric-original">—</strong><small>原表口径，含原表已有日期安排</small></article><article class="metric-card"><span class="metric-label">当前月趟次</span><strong id="metric-current">—</strong><small id="metric-current-note">与原始版本一致</small></article><article class="metric-card metric-accent"><span class="metric-label">累计减少趟次</span><strong id="metric-reduction">—</strong><small id="metric-affected">尚未调整</small></article><article class="metric-card goal-card"><label class="metric-label" for="trip-target">希望减少的月趟次 <span class="optional">选填</span></label><div class="goal-input-wrap"><input id="trip-target" type="number" min="0" step="1" placeholder="设置目标" inputmode="numeric"><span>趟</span></div><small id="target-result">填写后可查看距离目标的差额</small></article></div>
+
+      <div class="workbench-grid"><div class="main-column">
+        <section class="panel routes-panel" aria-labelledby="routes-heading"><div class="panel-heading"><div><h2 id="routes-heading">选择线路，开始试算</h2><p>当前操作：A 计划 · 营运1投放减少 1 台</p></div><span class="tag tag-neutral" id="current-version-label">V0 · 原始版本</span></div>
+          <div class="filters"><div class="filter-field search-field"><label for="route-search">线路</label><div class="search-wrap"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="m13 13 4 4"/></svg><input id="route-search" type="search" placeholder="搜索线路名称" autocomplete="off"></div></div><div class="filter-field"><label for="month-filter">月份</label><select id="month-filter"><option value="1月">1 月</option></select></div><div class="filter-field department-field"><label for="department-filter">业务部</label><select id="department-filter"><option value="">全部业务部</option></select></div><div class="filter-field plan-field"><label for="plan-filter">计划类型</label><select id="plan-filter" disabled title="第一版仅开放已确认的 A 计划营运1减车操作"><option>A 计划 · 营运1</option></select></div></div>
+          <div class="table-tools"><span id="route-count">0 条线路</span><div><label class="inline-check"><input type="checkbox" id="changed-only">仅看已调整</label><button class="text-button" id="clear-selection" hidden>清空选择</button></div></div><div class="mobile-table-hint">左右滑动表格，查看趟次、差异和锁定操作 <span aria-hidden="true">→</span></div>
+          <div class="route-table-wrap"><table class="route-table"><thead><tr><th class="check-cell"><input type="checkbox" id="select-all" aria-label="选择当前筛选结果中所有未锁定线路"></th><th>线路 / 业务部</th><th>月份</th><th class="numeric">营运1投放<span class="table-subhead">台</span></th><th class="numeric">A计划日趟次<span class="table-subhead">趟 / 日</span></th><th class="numeric">A计划天数<span class="table-subhead">天</span></th><th class="numeric" title="按原表逐日计划列求和，保持原表口径；部分月份含越界日期，详见数据检查。">月趟次<span class="table-subhead">原表口径</span></th><th class="numeric">较原始变化<span class="table-subhead">趟</span></th><th class="lock-cell">锁定</th></tr></thead><tbody id="routes-body"></tbody></table><div class="table-empty" id="table-empty" hidden><strong>没有符合条件的线路</strong><p>试试其他月份、业务部或线路名称。</p></div></div>
+          <div class="adjustment-bar"><div class="selection-info"><span id="selection-count">未选择线路</span><small id="selection-note">勾选要调整的线路，可先锁定重点线路。</small></div><div class="adjustment-actions"><button class="button button-outline" id="restore-button" disabled title="恢复至当前草稿父版本的投放数">局部恢复</button><button class="button button-primary" id="adjust-button" disabled><span aria-hidden="true">−</span> 减少 1 台并试算</button></div></div>
+        </section>
+
+        <section class="panel validation-panel"><div class="panel-heading"><div><h2>数据检查</h2><p>区分原表已有问题与本次调整产生的问题。</p></div><button class="text-button" id="toggle-warnings">展开明细 <span aria-hidden="true">↓</span></button></div><div class="validation-summary" id="validation-summary"></div><div class="warning-list" id="warnings-list" hidden></div><div class="pending-rules"><span class="pending-label">待确认</span><span>公里换算</span><span>最低服务标准</span><span>日期类型关系</span><span>小数步长</span><small>暂不据此判断是否达标</small></div></section>
+      </div>
+
+      <aside class="side-column"><section class="panel draft-panel"><div class="panel-heading"><div><div class="eyebrow">CURRENT SCENARIO</div><h2 id="draft-title">原始版本 V0</h2></div><span class="draft-indicator" id="draft-status">只读</span></div><div class="draft-summary" id="draft-summary">选择线路和月份后开始调整，原始数据会完整保留。</div><div class="draft-parent" id="draft-parent"></div><div class="operation-heading"><span>本版修改记录</span><button class="text-button" id="undo-button" disabled>撤销上一步</button></div><div id="operation-list" class="operation-list"><div class="operation-empty"><span aria-hidden="true">↗</span><p>还没有调整记录</p><small>每次操作都会记录在这里</small></div></div><button class="button button-primary save-button" id="save-button" disabled>保存为新版本 <span aria-hidden="true">→</span></button><small class="save-hint">保存时填写原因，便于后续核对与追溯。</small></section>
+        <section class="panel chart-panel"><div class="panel-heading"><div><h2>各月趟次变化</h2><p>全部线路 · 较原始版本</p></div></div><div id="monthly-chart" class="monthly-chart"></div><div class="chart-caption"><span class="chart-legend"></span>减少的月趟次 <span>单位：趟</span></div></section>
+        <div class="formula-note"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="m10 2 6 2.5v5c0 4-6 7-6 7s-6-3-6-7v-5L10 2Z"/><path d="m7 9 2 2 4-4"/></svg><p>本次只改动选定的投放输入。<br>逐日计划、单车日趟次与原有公式保持原样。</p></div>
+      </aside></div>
+      <div class="page-footnote">月趟次按基础表现有逐日列汇总；日期异常保留并提示。公里数与最低标准待业务口径确认后接入。</div>
+    </section>
+  </main>
+
+  <input type="file" id="file-input" accept=".xlsx" hidden>
+  <div class="toast-region" id="toast-region" aria-live="polite" aria-atomic="false"></div>
+  <div class="busy-overlay" id="busy-overlay" hidden><div class="busy-box" role="status" aria-live="polite"><span class="spinner"></span><strong id="busy-title">正在读取基础表</strong><p id="busy-message">正在保留公式并检查数据，请稍候。</p></div></div>
+
+  <dialog id="save-dialog" class="modal"><form id="save-form"><div class="modal-header"><div><span class="eyebrow">SAVE VERSION</span><h2>保存本次预算方案</h2></div><button type="button" class="icon-button" data-close-dialog aria-label="关闭">×</button></div><p id="save-description" class="modal-description"></p><label class="form-label" for="save-reason">调整原因 <span class="required">必填</span></label><textarea id="save-reason" rows="4" maxlength="1000" placeholder="例如：根据财务要求压减常规投放，保留重点线路服务。" required></textarea><p class="field-help">原因将与操作范围、参数和结果一起保存在该版本。</p><div class="modal-footer"><button type="button" class="button button-outline" data-close-dialog>取消</button><button type="submit" class="button button-primary">确认保存版本</button></div></form></dialog>
+
+  <dialog id="export-dialog" class="modal"><div class="modal-header"><div><span class="eyebrow">EXPORT EXCEL</span><h2>导出预算结果</h2></div><button class="icon-button" data-close-dialog aria-label="关闭">×</button></div><p class="modal-description" id="export-description"></p><div class="export-options"><button class="export-option" data-export-kind="monthly"><span class="export-symbol">▦</span><span><strong>月趟次试算表</strong><small>新增月趟次汇总页，并保留原始计算工作表</small></span><span>↓</span></button><button class="export-option" data-export-kind="workbook"><span class="export-symbol">▤</span><span><strong>完整预算基础表</strong><small>保留该版本所有原表公式</small></span><span>↓</span></button></div><p class="field-help">导出使用当前已保存版本；如有未保存调整，请先保存。</p></dialog>
+
+  <dialog id="versions-dialog" class="modal versions-modal"><div class="modal-header"><div><span class="eyebrow">VERSION HISTORY</span><h2>每个方案，都有迹可循</h2></div><button class="icon-button" data-close-dialog aria-label="关闭">×</button></div><p class="modal-description">打开历史版本查看结果，也可以从它继续创建新方案。</p><div id="versions-list" class="versions-list"></div></dialog>
+
+  <dialog id="help-dialog" class="modal"><div class="modal-header"><div><span class="eyebrow">QUICK START</span><h2>从减一台开始</h2></div><button class="icon-button" data-close-dialog aria-label="关闭">×</button></div><ol class="help-steps"><li><strong>导入预算基础表</strong><p>系统保留只读 V0，后续操作都在新方案中进行。</p></li><li><strong>选择线路和月份</strong><p>勾选需要调整的记录。锁定线路后，该线路所有月份都不能调整。</p></li><li><strong>减少 1 台并试算</strong><p>只把 A 计划营运1投放数减 1，其他输入和原有公式保留。请先核对趟次变化和数据检查。</p></li><li><strong>恢复、保存、导出</strong><p>局部恢复回到草稿父版本的投放数；也可以撤销上一步。填写原因后保存为新版本，再导出 Excel。</p></li></ol><div class="help-callout">本版暂不计算公里变化或判定最低服务标准；月趟次保持原表口径，包括原表已有日期问题。</div></dialog>
+</body>
+</html>
